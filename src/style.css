@@ -130,19 +130,26 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
-  cursor: grab;
+  cursor: pointer;
   font-size: 1.1rem;
   font-weight: 600;
-  transition: border-color 0.2s ease, transform 0.15s ease;
+  transition: border-color 0.2s ease, transform 0.15s ease, background 0.2s ease;
   user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .sort-item:hover {
   border-color: var(--accent);
 }
 
-.sort-item.dragging {
-  opacity: 0.4;
+.sort-item:active {
+  transform: scale(0.98);
+}
+
+.sort-item.selected {
+  border-color: var(--accent-2);
+  background: rgba(110, 231, 183, 0.1);
+  transform: scale(1.02);
 }
 
 .item-number {
@@ -348,4 +355,13 @@ body {
 .btn-secondary:hover {
   border-color: var(--danger);
   color: var(--danger);
+}
+
+
+/* ===== TAP HINT ===== */
+.tap-hint {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin-top: -0.5rem;
 }

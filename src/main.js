@@ -14,7 +14,8 @@ let timeLeft = ROUND_SECONDS
 let timerInterval = null
 let roundLocked = false
 let roundStarted = false
-let draggedIndex = null
+let firstSelectedIndex = null
+let hasMadeMove = false
 
 const app = document.querySelector('#app')
 
@@ -79,6 +80,14 @@ function shuffle(array) {
   return arr
 }
 
+function shuffleNoFullMatch(original) {
+  let result
+  do {
+    result = shuffle(original)
+  } while (result.every((item, i) => item === original[i]) && original.length > 1)
+  return result
+}
+
 function pickRandomRound() {
   const idx = Math.floor(Math.random() * rounds.length)
   return rounds[idx]
@@ -89,12 +98,13 @@ function prepareNextRound() {
   roundLocked = false
   roundStarted = false
   timeLeft = ROUND_SECONDS
+  firstSelectedIndex = null
   currentRound = pickRandomRound()
 
-  let scrambled
-  do {
-    scrambled = shuffle(currentRound.items)
-  } while (scrambled.join() === currentRound.items.join() && currentRound.items.length > 1)
+  hasMadeMove = false
+  currentRound = pickRandomRound()
+
+  const scrambled = shuffleNoFullMatch(currentRound.items)
 
   currentOrder = scrambled
   renderQuestionScreen()
@@ -119,12 +129,16 @@ function startTimer() {
 }
 
 function calculateScore() {
+  if (!hasMadeMove) return 0
+
   const correct = currentRound.items
+  const total = correct.length
+
   let correctCount = 0
   currentOrder.forEach((item, i) => {
     if (item === correct[i]) correctCount++
   })
-  const total = correct.length
+
   if (correctCount === total) return 100
   if (correctCount === 0) return 0
   return Math.round((correctCount / total) * 100 * 0.6)
@@ -149,42 +163,32 @@ function resetCurrentRound() {
   clearInterval(timerInterval)
   timeLeft = ROUND_SECONDS
   roundLocked = false
+  firstSelectedIndex = null
 
-  let scrambled
-  do {
-    scrambled = shuffle(currentRound.items)
-  } while (scrambled.join() === currentRound.items.join() && currentRound.items.length > 1)
+  hasMadeMove = false
+
+  const scrambled = shuffleNoFullMatch(currentRound.items)
   currentOrder = scrambled
-
-  renderActiveRound()
-  startTimer()
 }
 
 // ============== DRAG AND DROP ==============
-function handleDragStart(e, index) {
-  draggedIndex = index
-  e.dataTransfer.effectAllowed = 'move'
-  e.target.classList.add('dragging')
-}
-
-function handleDragEnd(e) {
-  e.target.classList.remove('dragging')
-}
-
-function handleDragOver(e) {
-  e.preventDefault()
-  e.dataTransfer.dropEffect = 'move'
-}
-
-function handleDrop(e, dropIndex) {
-  e.preventDefault()
-  if (draggedIndex === null || draggedIndex === dropIndex) return
-
+// ============== REORDER LOGIC (tap-to-swap: works on mouse AND touch) ==============
+function handleItemTap(index) {
+  if (firstSelectedIndex === null) {
+    firstSelectedIndex = index
+    renderItems()
+    return
+  }
+  if (firstSelectedIndex === index) {
+    firstSelectedIndex = null
+    renderItems()
+    return
+  }
   const newOrder = [...currentOrder]
-  const [moved] = newOrder.splice(draggedIndex, 1)
-  newOrder.splice(dropIndex, 0, moved)
+  ;[newOrder[firstSelectedIndex], newOrder[index]] = [newOrder[index], newOrder[firstSelectedIndex]]
   currentOrder = newOrder
-  draggedIndex = null
+  firstSelectedIndex = null
+  hasMadeMove = true
   renderItems()
 }
 
@@ -251,7 +255,6 @@ function renderActiveRound() {
 
       <div class="round-header">
         <div class="current-team-banner">${TEAM_NAMES[currentTeamIndex]}'s turn</div>
-        <div class="difficulty-badge ${currentRound.difficulty}">${currentRound.difficulty}</div>
       </div>
 
       <h1 class="prompt">${currentRound.prompt}</h1>
@@ -261,6 +264,7 @@ function renderActiveRound() {
       </div>
 
       <div id="items-list" class="items-list"></div>
+      <p class="tap-hint">Tap two items to swap their positions</p>
 
       <div class="controls">
         <button id="reset-round-btn" class="btn-secondary">↺ Reset Round</button>
@@ -277,19 +281,16 @@ function renderItems() {
   const list = document.querySelector('#items-list')
   if (!list) return
   list.innerHTML = currentOrder.map((item, i) => `
-    <div class="sort-item" draggable="true" data-index="${i}">
+    <div class="sort-item ${i === firstSelectedIndex ? 'selected' : ''}" data-index="${i}">
       <span class="item-number">${i + 1}</span>
       <span class="item-text">${item}</span>
-      <span class="drag-handle">⠿</span>
+      <span class="drag-handle">⇅</span>
     </div>
   `).join('')
 
   list.querySelectorAll('.sort-item').forEach(el => {
     const idx = Number(el.dataset.index)
-    el.addEventListener('dragstart', (e) => handleDragStart(e, idx))
-    el.addEventListener('dragend', handleDragEnd)
-    el.addEventListener('dragover', handleDragOver)
-    el.addEventListener('drop', (e) => handleDrop(e, idx))
+    el.addEventListener('click', () => handleItemTap(idx))
   })
 }
 
