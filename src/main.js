@@ -80,6 +80,8 @@ function shuffle(array) {
   return arr
 }
 
+// Shuffles items, only re-rolling if ALL items happen to land in the fully
+// correct order by chance. Partial coincidental matches (1-3 items) are fine.
 function shuffleNoFullMatch(original) {
   let result
   do {
@@ -99,14 +101,12 @@ function prepareNextRound() {
   roundStarted = false
   timeLeft = ROUND_SECONDS
   firstSelectedIndex = null
-  currentRound = pickRandomRound()
-
   hasMadeMove = false
   currentRound = pickRandomRound()
 
   const scrambled = shuffleNoFullMatch(currentRound.items)
-
   currentOrder = scrambled
+
   renderQuestionScreen()
 }
 
@@ -129,6 +129,7 @@ function startTimer() {
 }
 
 function calculateScore() {
+  // No moves at all = no points, even if the shuffle happened to be partially correct by luck.
   if (!hasMadeMove) return 0
 
   const correct = currentRound.items
@@ -164,14 +165,16 @@ function resetCurrentRound() {
   timeLeft = ROUND_SECONDS
   roundLocked = false
   firstSelectedIndex = null
-
   hasMadeMove = false
 
+  // Re-scramble the same question fresh
   const scrambled = shuffleNoFullMatch(currentRound.items)
   currentOrder = scrambled
+
+  renderActiveRound()
+  startTimer()
 }
 
-// ============== DRAG AND DROP ==============
 // ============== REORDER LOGIC (tap-to-swap: works on mouse AND touch) ==============
 function handleItemTap(index) {
   if (firstSelectedIndex === null) {
@@ -180,10 +183,12 @@ function handleItemTap(index) {
     return
   }
   if (firstSelectedIndex === index) {
+    // tapped the same item again — deselect
     firstSelectedIndex = null
     renderItems()
     return
   }
+  // swap the two selected items
   const newOrder = [...currentOrder]
   ;[newOrder[firstSelectedIndex], newOrder[index]] = [newOrder[index], newOrder[firstSelectedIndex]]
   currentOrder = newOrder
@@ -220,7 +225,7 @@ function renderSetupScreen() {
   })
 }
 
-// ============== QUESTION SCREEN ==============
+// ============== QUESTION SCREEN (prompt only, no items, no timer yet) ==============
 function renderQuestionScreen() {
   app.innerHTML = `
     <div class="game-screen">
@@ -247,7 +252,7 @@ function renderQuestionScreen() {
   })
 }
 
-// ============== ACTIVE ROUND ==============
+// ============== ACTIVE ROUND (items visible, timer running) ==============
 function renderActiveRound() {
   app.innerHTML = `
     <div class="game-screen">
