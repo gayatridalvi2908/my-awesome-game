@@ -1,0 +1,351 @@
+@import "tailwindcss";
+
+:root {
+  --bg-deep: #0f1115;
+  --bg-card: #1a1d24;
+  --accent: #ffb347;
+  --accent-2: #6ee7b7;
+  --danger: #ff6b6b;
+  --text-main: #f4f4f4;
+  --text-dim: #9a9ea8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-deep);
+  color: var(--text-main);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+#app {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.game-screen {
+  width: 100%;
+  max-width: 900px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ===== SCOREBOARD ===== */
+.scoreboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+}
+
+.score-card {
+  background: var(--bg-card);
+  border: 2px solid transparent;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.score-card.active {
+  border-color: var(--accent);
+  background: linear-gradient(135deg, #2a2410, var(--bg-card));
+  transform: scale(1.03);
+}
+
+.score-team {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.score-value {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin-top: 0.25rem;
+}
+
+/* ===== ROUND HEADER ===== */
+
+.current-team-banner {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+
+/* ===== PROMPT ===== */
+.prompt {
+  font-size: 1.8rem;
+  font-weight: 700;
+  line-height: 1.3;
+  margin: 0;
+  text-align: center;
+}
+
+/* ===== TIMER ===== */
+.timer-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+#timer {
+  font-size: 3rem;
+  font-weight: 900;
+  color: var(--accent-2);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.3s ease;
+}
+
+#timer.urgent {
+  color: var(--danger);
+  animation: pulse 0.6s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+/* ===== ITEMS LIST ===== */
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.sort-item {
+  background: var(--bg-card);
+  border: 2px solid #2a2d35;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: grab;
+  font-size: 1.1rem;
+  font-weight: 600;
+  transition: border-color 0.2s ease, transform 0.15s ease;
+  user-select: none;
+}
+
+.sort-item:hover {
+  border-color: var(--accent);
+}
+
+.sort-item.dragging {
+  opacity: 0.4;
+}
+
+.item-number {
+  background: var(--accent);
+  color: #1a1d24;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.item-text {
+  flex: 1;
+}
+
+.drag-handle {
+  color: var(--text-dim);
+  font-size: 1.3rem;
+  cursor: grab;
+}
+
+/* ===== CONTROLS ===== */
+.controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 0.5rem;
+  gap: 1rem;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #1a1d24;
+  border: none;
+  padding: 0.9rem 2.5rem;
+  border-radius: 999px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 179, 71, 0.3);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* ===== REVEAL SCREEN ===== */
+.reveal-banner {
+  text-align: center;
+  padding: 1.25rem;
+  border-radius: 16px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  align-items: center;
+}
+
+.reveal-banner.perfect {
+  background: rgba(110, 231, 183, 0.12);
+  color: var(--accent-2);
+}
+
+.reveal-banner.partial {
+  background: rgba(255, 179, 71, 0.12);
+  color: var(--accent);
+}
+
+.reveal-banner.zero {
+  background: rgba(255, 107, 107, 0.12);
+  color: var(--danger);
+}
+
+.points-earned {
+  font-size: 1rem;
+  opacity: 0.85;
+}
+
+.reveal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.reveal-item {
+  background: var(--bg-card);
+  border: 2px solid #2a2d35;
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.reveal-item.correct {
+  border-color: var(--accent-2);
+}
+
+.reveal-item.incorrect {
+  border-color: var(--danger);
+}
+
+.reveal-icon {
+  margin-left: auto;
+  font-size: 1.3rem;
+  font-weight: 800;
+}
+
+.reveal-item.correct .reveal-icon {
+  color: var(--accent-2);
+}
+
+.reveal-item.incorrect .reveal-icon {
+  color: var(--danger);
+}
+
+/* ===== SETUP SCREEN ===== */
+.setup-screen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  text-align: center;
+  max-width: 500px;
+}
+
+.setup-title {
+  font-size: 3rem;
+  font-weight: 900;
+  margin: 0;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.setup-subtitle {
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.timer-options {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.timer-option-btn {
+  background: var(--bg-card);
+  border: 2px solid #2a2d35;
+  color: var(--text-main);
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.timer-option-btn:hover {
+  border-color: var(--accent);
+}
+
+.timer-option-btn.selected {
+  background: var(--accent);
+  color: #1a1d24;
+  border-color: var(--accent);
+}
+
+/* ===== WAITING TEXT ===== */
+.waiting-text {
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 1rem;
+  font-style: italic;
+}
+
+/* ===== SECONDARY BUTTON / RESET ===== */
+.btn-secondary {
+  background: transparent;
+  color: var(--text-dim);
+  border: 2px solid #2a2d35;
+  padding: 0.9rem 1.75rem;
+  border-radius: 999px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
